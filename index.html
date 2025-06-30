@@ -21,7 +21,7 @@
 
 <body>
 
-  <h2>FLD Map Viewer</h2>
+  <h2>Better Walk Plan Maker</h2>
   <input type="file" id="fileInput" accept=".fld,.fld2,.gz">
   <br>
   <canvas id="mapCanvas"></canvas>
@@ -97,6 +97,7 @@
 
         ctx.putImageData(imageData, 0, 0);
 
+        let clickCount = 0;
 
         canvas.addEventListener('click', function (e) {
           const rect = canvas.getBoundingClientRect();
@@ -112,11 +113,28 @@
             const byte = view.getUint8(3 + index);
             if (byte !== 0) {
               console.log(`Clicked non-walkable (dark gray) area at: x=${x}, y=${mapY}`);
-              clickedCoords.push({ x: x, y: mapY });
+              clickCount++; // increase on each valid click
+              clickedCoords.push({ x: x, y: mapY }); // still track coords
 
-              // Format the output
+              // Update the textarea
               const formatted = clickedCoords.map(c => `{ "x":${c.x}, "y":${c.y} }`).join(',\n');
               output.value = formatted;
+
+              // Draw yellow circle
+              ctx.fillStyle = 'yellow';
+              ctx.beginPath();
+              ctx.arc(x, y, 8, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.strokeStyle = 'black';
+              ctx.lineWidth = 1;
+              ctx.stroke();
+
+              // Draw global click count inside circle
+              ctx.fillStyle = 'black';
+              ctx.font = '10px sans-serif';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(clickCount.toString(), x, y);
             }
           }
         });
